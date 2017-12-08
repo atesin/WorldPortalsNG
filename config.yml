@@ -55,5 +55,6 @@ helpPage: |
   - Command help page: /p ? (displays this page)
   - Command list mode: /p [filter?] [page_number]
   list portals in current world according criteria (note the '?')
+  defaults: no filter, page 1 (or all pages from server console)
   - Command path finding mode: /p [start] finish
   print the path to the finish, also can click purple text links
