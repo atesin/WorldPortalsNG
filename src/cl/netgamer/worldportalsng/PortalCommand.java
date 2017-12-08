@@ -74,7 +74,7 @@ public class PortalCommand implements CommandExecutor
 					if (action == 'P')
 						return plugin.sendMessage(sender, "incompatibleParameters");
 					if (!destiny.isEmpty())
-						return plugin.sendMessage(sender, "ambiguousPattern");
+						return plugin.sendMessage(sender, "ambiguousFilter");
 					destiny = arg.substring(0, arg.length()-1);
 					action = 'L';
 				}
