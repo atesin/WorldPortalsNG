@@ -4,5 +4,5 @@ version: 1
 
 commands:
   portal:
-    description: "Build portals to travel within the worlds (help: /p ?)"
+    description: "Build portals to travel (help: /p ?)"
     aliases: [p]

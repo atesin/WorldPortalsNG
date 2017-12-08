@@ -192,7 +192,7 @@ public final class Main extends JavaPlugin
 		sender.sendMessage(String.format("\u00A7E"+pathTitle, start.getName(), finish.getName()));
 		TablePrinter pathTable = new TablePrinter("\u00A7B", 8, 8, 15);
 		pathTable.setText(rows.substring(1));
-		pathTable.print(sender, headers[2]+"\t"+headers[0]+"\t"+headers[3]);
+		pathTable.print(sender, headers[2]+"\t"+headers[4]+"\t"+headers[3]);
 		pathTable.print(sender, 0);
 		
 		

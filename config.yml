@@ -23,7 +23,7 @@ allowedWorlds: [0]
 
 # Localized interface sentences, watch column widths and do some tests after modify
 cardinalDirections: [south,west,north,east]
-headers: [---Name---,---Location---,--Dir--,---Distance---]
+headers: [---Name---,---Location---,--Dir--,---Distance---,---Destination---]
 fields: [Help,Portal distances,current location,(none)]
 listTitle: "Portals in this World: filter '%1$s', page %2$s of %3$s"
 pathTitle: "Path finding from: %1$s, to: %2$s"
