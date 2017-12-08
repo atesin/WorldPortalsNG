@@ -1,0 +1,10 @@
+# WorldPortalsNG portals data file.
+# 
+# Do not modify or portals could get corrupted, many calculations are made
+# after portals load, e.g. links network, structural blocks, etc.
+#
+# With WorldPortalsNG v1 you can migrate from WorldPortals seamlessly
+# just by replacing this file with the data.yml file from previous plugin,
+# both plugins cannot coexist so you should disable WorldPortals before start
+# SHUT THE SERVER DOWN AND MAKE A FULL BACKUP BEFORE PROCEED
+

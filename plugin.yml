@@ -1,0 +1,8 @@
+name: WorldPortalsNG
+main: cl.netgamer.worldportalsng.Main
+version: 1
+
+commands:
+  portal:
+    description: "Build portals to travel within the worlds (help: /p ?)"
+    aliases: [p]

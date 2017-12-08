@@ -1,0 +1,59 @@
+# WorldPortals NextGen plugin configuration file
+# get automatic mail notifications on updates by following the project page
+# https://dev.bukkit.org/projects/world-portals-ng
+# 
+# If you had migrated from WorldPortals, you can copy some configurations
+# from previous plugin, see included data.yml file comments for more information
+
+
+# Spacetime travel damage health points (i.e.: 8 points = 4 hearths)
+healthCost: 8
+
+
+# Drop a sign when some portal is destroyed to recover
+dropSign: false
+
+
+# Indexes of worlds where portals can be activated, as returned by Bukkit.getWorlds()
+# i.e.: 0, 1, 2, etc. = world (overworld), world_nether, world_the_end, etc.
+# If fails maybe you are using some plugin that manages worlds in other ways,
+# ask the developers of your suspected plugin.
+allowedWorlds: [0]
+
+
+# Localized interface sentences, watch column widths and do some tests after modify
+cardinalDirections: [south,west,north,east]
+headers: [---Name---,---Location---,--Dir--,---Distance---]
+fields: [Help,Portal distances,current location,(none)]
+listTitle: "Portals in this World: filter '%1$s', page %2$s of %3$s"
+pathTitle: "Path finding from: %1$s, to: %2$s"
+
+
+# Localized status messages, be careful with screen width and do some tests after modify,
+# with non ascii characters use escaped unicode versions to avoid encoding problems.
+# You can use the single keyword "hide" (no quotes) to hide some alerts
+messages:
+  portalOverlapping: Portals cannot share structural blocks
+  forbiddenWorld: Cannot build Portals in this world
+  invalidName: Invalid name, use just [a-z] [A-Z] [0-9] and hyphens
+  nameTooLong: Portal name exceeds maximum length of 15
+  looksLikeANumber: Cannot name a Portal with just a plain number
+  unavailableName: This name is already being used by another portal
+  insufficientHealth: Insufficient health to travel through spacetime
+  portalNotFound: Could not find the specified Portal(s)
+  mustSpecifyStart: Non player users must specify starting Portal
+  differentWorlds: Specified Portals are not from the same world
+
+
+# Localized help page, 53chars at 6px max width (320px) and 10 lines height.
+# Do some tests after modify, and please post your translations at the project page
+helpPage: |
+  Help page for WorldPortalsNG plugin
+  Build a vertical 3x4 obsidian frame and stake a signpost
+  on the floor inside with the portal name in the first line.
+  Enter some portal, turn the direction you want to go and wait.
+  - Command help page: /p ? (displays this page)
+  - Command list mode: /p [filter?] [page_number]
+  list portals in current world according criteria (note the '?')
+  - Command path finding mode: /p [start] finish
+  print the path to the finish, also can click purple text links
