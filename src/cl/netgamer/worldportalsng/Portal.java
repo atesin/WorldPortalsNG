@@ -81,7 +81,7 @@ class Portal
 	
 	// fast horizontal distance
 	// https://math.stackexchange.com/questions/2533022/fast-approximated-hypotenuse-without-squared-root
-	int hDistance(int index)
+	int getHDistanceTo(int index)
 	{
 		Portal destination = destinations[index];
 		if (destination == null)

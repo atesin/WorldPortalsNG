@@ -1,0 +1,10 @@
+v2
+
+- dropped support for migrating from WorldPortals, replaced with a message
+- first portal should be the closer, nevermind the direction
+- added a header in config.yml line 26 for destination paths found
+
+v1
+
+- initial release
+- suport for migrating from WorldPortals

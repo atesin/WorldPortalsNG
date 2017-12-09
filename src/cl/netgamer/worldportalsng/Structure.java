@@ -117,14 +117,10 @@ public class Structure
 			base.getRelative(BlockFace.UP).setType(Material.AIR);
 	 		
 			// find and delete name label armor stands
-			// REMOVE IN LATER VERSIONS: Loc2 and Loc3 are for backward compatibility
 			Location labelLoc = portalLocation.clone().add(0.5, 1.1, 0.5);
-			Location labelLoc2 = portalLocation.clone().add(0.5, 0.1, 0.5);
-			Location labelLoc3 = portalLocation.clone().add(0.5, -0.3, 0.5);
 			for (Entity e : labelLoc.getWorld().getNearbyEntities(labelLoc, 2, 2, 2))
-				if (e instanceof ArmorStand)
-					if (e.getLocation().equals(labelLoc) || e.getLocation().equals(labelLoc2) || e.getLocation().equals(labelLoc3))
-						e.remove();
+				if (e instanceof ArmorStand && e.getLocation().equals(labelLoc))
+					e.remove();
 			
 			// unregister portal structural blocks
 			for (Iterator<Entry<Location, Location>> iter = portalBlocks.entrySet().iterator(); iter.hasNext();)

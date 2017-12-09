@@ -10,7 +10,7 @@
 healthCost: 8
 
 
-# Drop a sign when some portal is destroyed to recover
+# Drop a sign when some portal is destroyed to recover it
 dropSign: false
 
 

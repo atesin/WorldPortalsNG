@@ -47,6 +47,7 @@ public final class Main extends JavaPlugin
 	private Map<String, Object> messages;
 	private Map<String, BukkitTask> scheduledTeleports = new HashMap<String, BukkitTask>();
 	private Map<String, BossBar> bossBars = new HashMap<String, BossBar>();
+	boolean stopPlugin = false;
 	
 	
 	public void onEnable()
@@ -65,25 +66,16 @@ public final class Main extends JavaPlugin
 		// load classes and portals
 		struc = new Structure(getConfig().getBoolean("dropSign"));
 		data = new Data(this);
-		
-		// construct and update portal links
-		
-		// CLEAN UP THE MESS IN LATER VERSIONS 
+		if (stopPlugin)
+		{
+			getPluginLoader().disablePlugin(this);
+			return;
+		}
 		links = new LinkManager(portalsByName.values());
-		data.loadPortals();
-		links.updateDestinations(portalsByName.values());
 		
 		// ready to work, listen events and commands
 		new Events(this);
 		getCommand("portal").setExecutor(new PortalCommand(this));
-		
-		System.out.println("- Hello Admin, this will be the only version of WorldPortalsNG");
-		System.out.println("- that converts portals from previous WorldPortals plugin,");
-		System.out.println("- read comments in included data.yml file for more information.");
-		System.out.println("- If your portals were converted i beg you to use a later version");
-		System.out.println("- which won't include the messy legacy code needed for conversion");
-		System.out.println("- and will have a more polished, efficient, light and fast code.");
-		System.out.println("- https://dev.bukkit.org/projects/world-portals-ng/files");
 		
 		// debug
 		//System.out.println("Portals = "+portalsByName.values());
@@ -96,6 +88,14 @@ public final class Main extends JavaPlugin
 		for (Player player : getServer().getOnlinePlayers())
 			if (bossBars.containsKey(player.getUniqueId().toString()))
 				bossBars.get(player.getUniqueId().toString()).removePlayer(player);
+	}
+	
+	
+	void loadPortal(String name, Location location, float facing)
+	{
+		portalsByName.put(name, new Portal(name, location, facing));
+		namesByLocation.put(location, name);
+		struc.registerPortalBlocks(location, facing);
 	}
 	
 	
@@ -112,13 +112,6 @@ public final class Main extends JavaPlugin
 		else
 			System.out.println(message);
 		return true;
-	}
-	
-	
-	// REMOVE THIS IN LATER VERSIONS
-	boolean structureDisable(Location portalLocation, float facing)
-	{
-		return struc.build(portalLocation, facing, null);
 	}
 	
 	
@@ -156,7 +149,8 @@ public final class Main extends JavaPlugin
 	
 	boolean pathFind(CommandSender sender, String origin, String destiny)
 	{
-		Portal start = portalsByName.get(origin), finish;
+		Portal start = portalsByName.get(origin), finish = portalsByName.get(destiny);
+		boolean tempPortal = false;
 		
 		if (!origin.isEmpty())
 		{
@@ -166,26 +160,25 @@ public final class Main extends JavaPlugin
 		}
 		else if (sender instanceof Player)
 		{
-			// try origin with a temporary portal on player location
+			// try current location with a temporary portal on player location
 			start = new Portal(fields[2], ((Player)sender).getLocation(), 0);
 			start.setDestinations(links.searchPortalDestinations(start, portalsByName.values()));
+			tempPortal = true;
 		}
-		
-		// you didnt specified origin and you don't have a location (are from console)
 		else
+			// you didnt specified origin and you don't have a location (are from console)
 			return sendMessage(sender, "mustSpecifyStart");
 		
 		// try destiny with specified portal
-		if ((finish = portalsByName.get(destiny)) == null)
+		if (finish == null)
 			return sendMessage(sender, "portalNotFound");
 		
-		//return "--- direction --- portal --- distance ---"+pathFind(portal, destination);
-		
+		// cant reach portal from differente worlds
 		if (start.getLocation().getWorld() != finish.getLocation().getWorld())
 			return sendMessage(sender, "differentWorlds");
 		
 		
-		String rows = pathFind(start, finish);
+		String rows = pathFind(start, finish, tempPortal);
 		if (rows.isEmpty())
 			rows = "#\u00A77"+fields[3];
 		
@@ -195,84 +188,64 @@ public final class Main extends JavaPlugin
 		pathTable.print(sender, headers[2]+"\t"+headers[4]+"\t"+headers[3]);
 		pathTable.print(sender, 0);
 		
-		
 		return true;
 	}
 	
 	
-	private String pathFind(Portal start, Portal finish)
+	private String pathFind(Portal start, Portal finish, boolean tempPortal)
 	{
-		// get relative direction from start to finish, to begin search
-		Location startLocation = start.getLocation();
-		int direction = links.getDirection(startLocation, finish.getLocation());
-		Portal destination = start.getDestination(direction);
+		int direction = -1;
+		if (tempPortal)
+		{
+			// with temporary portal just get the direction to the nearest one
+			int hDistance = -1;
+			for (int i = 0; i < 4 ; ++i)
+				if (start.getHDistanceTo(i) < hDistance || hDistance < 0)
+				{
+					direction = i;
+					hDistance = start.getHDistanceTo(direction);
+				}
+		}
+		else
+			// get the direction from start to finish
+			direction = links.getDirection(start.getLocation(), finish.getLocation());
 		
-		String result = "\n"+cardinal[direction]+
-						"\t"+destination.getName()+
-						"\t"+start.hDistance(direction);
-				
-		if (destination == finish)
-			return result;
-		return result+pathFind(destination, finish);
+		Portal next = start.getDestination(direction);
+		return "\n"+cardinal[direction]+
+			"\t"+next.getName()+
+			"\t"+start.getHDistanceTo(direction)+
+			(next == finish ? "" : pathFind(start, finish, false));
 	}
 	
 	
-	// MUST REWRITE THESE 2 METHODS IN LATER VERSIONS
 	// test if a built structure is a valid portal
-	void testPortalCreation(Player player, Block centerBlock, String name)
+	boolean testPortalCreation(Player player, Block centerBlock, String name)
 	{
 		// get portal facing if structure is valid
 		float facing = struc.test(centerBlock, player.getLocation().getYaw());
-		if (facing >= 0)
-			testPortalCreation(player, centerBlock.getLocation(), facing, name, true);
-	}
-	
-	
-	// test if built or loaded structure is a valid portal
-	boolean testPortalCreation(CommandSender sender, Location portalLocation, float facing, String name, boolean interactive)
-	{
+		if (facing < 0)
+			return true;
+		
 		// allow portals in this world?
-		//Location portalLocation = centerBlock.getLocation();
+		Location portalLocation = centerBlock.getLocation();
 		if (!allowedWorlds.contains(Integer.valueOf(getServer().getWorlds().indexOf(portalLocation.getWorld()))))
-			return sendMessage(sender, "forbiddenWorld");
+			return sendMessage(player, "forbiddenWorld");
 		
 		// validate name
 		String status = testPortalName(name);
 		if (status != null)
-			return sendMessage(sender, status);
+			return sendMessage(player, status);
 		
 		// build portal structure if not overlapping with another, or just register blocks on portal load
-		if (interactive)
-		{
-			if (!struc.build(portalLocation, facing, name))
-				return sendMessage(sender, "portalOverlapping");
-			
-			data.savePortal(name, portalLocation, facing);
-		}
-		else
-			struc.registerPortalBlocks(portalLocation, facing);
+		if (!struc.build(portalLocation, facing, name))
+			return sendMessage(player, "portalOverlapping");
 		
-		
-		// all checks passed, save portal in conf file and create it
-		
-		// register portal structural blocks, already done in previous method after player events
-		//if (!interactive)
-		//	struc.registerPortalBlocks(portalLocation, facing);
-		
-		// all checks passed, create portal and cache in memory
+		// all checks passed, create and save portal
+		data.savePortal(name, portalLocation, facing);
 		Portal portal = new Portal(name, portalLocation, facing);
 		namesByLocation.put(portalLocation, name);
 		portalsByName.put(name, portal);
-		
-		// update destinations, already done after plugin load
-		if (interactive)
-			//links.setPortalDestinations(portal, portalsByName.values(), false);
-			links.updateDestinations(portalsByName.values());
-		
-		// debug
-		//if (interactive)
-		//	System.out.println("Portals = "+portalsByName.values());
-		
+		links.updateDestinations(portalsByName.values());
 		return true;
 	}
 	
@@ -317,14 +290,9 @@ public final class Main extends JavaPlugin
 	{
 		// get owner portal location if any
 		Location portalLocation = struc.getPortalLocation(destroyedBlock);
-		if (portalLocation != null)
-			testPortalDestroy(portalLocation);
-	}
-	
-	
-	// MERGE WITH PREVIOUS METHOD IN LATER VERSIONS
-	void testPortalDestroy(Location portalLocation)
-	{	
+		if (portalLocation == null)
+			return;
+			
 		// gather info about destroyed portal
 		String portalName = namesByLocation.get(portalLocation);
 		Portal portal = portalsByName.get(portalName);
@@ -342,12 +310,7 @@ public final class Main extends JavaPlugin
 				destinations.get(direction).resetDestination((direction+2)%4);
 		
 		// update nearby portals destinations
-		//for (int direction = 0 ; direction < 4 ; ++direction)
-		//	links.setPortalDestinations(destinations.get(direction), destinations, false);
 		links.updateDestinations(portalsByName.values());
-		
-		// debug
-		//System.out.println("Portals = "+portalsByName.values());
 	}
 	
 	
@@ -401,7 +364,7 @@ public final class Main extends JavaPlugin
 		{
 			if ((destination = portal.getDestination(i)) != null)
 				// create score just by mentioning
-				obj.getScore("\u00A7E"+cardinal[i]+": \u00A7B"+destination.getName()).setScore(portal.hDistance(i));
+				obj.getScore("\u00A7E"+cardinal[i]+": \u00A7B"+destination.getName()).setScore(portal.getHDistanceTo(i));
 		}
 		
 		player.setScoreboard(board);
@@ -456,7 +419,7 @@ public final class Main extends JavaPlugin
 		
 		// format bar text
 		String name = cardinal[(facing+3)%4]+" <"+
-			cardinal[facing]+": "+(destination==null?"(none)":destination.getName())+
+			cardinal[facing]+": "+(destination==null?"\u00A77"+fields[3]:destination.getName())+
 			"> "+cardinal[(facing+1)%4];
 		String spacer = "                              ".substring((64 - name.length())/2);
 		name = "\u00A77"+name;

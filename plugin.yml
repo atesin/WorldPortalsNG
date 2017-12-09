@@ -1,6 +1,6 @@
 name: WorldPortalsNG
 main: cl.netgamer.worldportalsng.Main
-version: 1
+version: 2
 
 commands:
   portal:

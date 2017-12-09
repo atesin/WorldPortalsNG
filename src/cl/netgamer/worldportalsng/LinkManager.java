@@ -9,7 +9,7 @@ class LinkManager
 	
 	LinkManager(Collection<Portal> portals)
 	{
-		//updateDestinations(portals);
+		updateDestinations(portals);
 	}
 	
 	

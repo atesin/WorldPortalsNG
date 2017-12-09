@@ -1,2 +1,0 @@
-- drop support for migrating from WorldPortals
-- first portal should be the closer, nevermind the direction
