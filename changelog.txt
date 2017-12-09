@@ -1,3 +1,7 @@
+v3
+
+- fixed an infinte loop with certain conditions in pathfinding
+
 v2
 
 - dropped support for migrating from WorldPortals, replaced with a message

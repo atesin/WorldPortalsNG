@@ -214,7 +214,7 @@ public final class Main extends JavaPlugin
 		return "\n"+cardinal[direction]+
 			"\t"+next.getName()+
 			"\t"+start.getHDistanceTo(direction)+
-			(next == finish ? "" : pathFind(start, finish, false));
+			(next == finish ? "" : pathFind(next, finish, false));
 	}
 	
 	
