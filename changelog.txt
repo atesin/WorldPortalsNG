@@ -1,6 +1,12 @@
+v4
+
+- to do
+
 v3
 
 - fixed an infinte loop with certain conditions in pathfinding
+- if you dont specify a starting portal in patfinding, it shows the closer to you as first one
+
 
 v2
 
